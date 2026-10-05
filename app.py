@@ -9,35 +9,26 @@ st.write("SVM with tuned RBF kernel")
 model = joblib.load("svm_flower_model.joblib")
 
 
-def sync_input(source_key, target_key):
-    st.session_state[target_key] = st.session_state[source_key]
-
-
 def feature_input(label, minimum, maximum, default):
-    slider_key = f"{label}_slider"
     number_key = f"{label}_number"
-    st.session_state.setdefault(slider_key, default)
     st.session_state.setdefault(number_key, default)
-    st.slider(
+    slider_value = st.slider(
         label,
         minimum,
         maximum,
+        value=st.session_state[number_key],
         step=0.01,
-        key=slider_key,
-        on_change=sync_input,
-        args=(slider_key, number_key),
     )
-    st.number_input(
+    if slider_value != st.session_state[number_key]:
+        st.session_state[number_key] = slider_value
+    return st.number_input(
         f"{label} (กรอกตัวเลข)",
         minimum,
         maximum,
         step=0.01,
         format="%.2f",
         key=number_key,
-        on_change=sync_input,
-        args=(number_key, slider_key),
     )
-    return st.session_state[number_key]
 
 
 sepal_length = feature_input("Sepal length (cm)", 4.0, 8.0, 5.8)
