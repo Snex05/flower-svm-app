@@ -7,10 +7,43 @@ st.title("🌸 Synthetic Flower Species Classifier")
 st.write("SVM with tuned RBF kernel")
 
 model = joblib.load("svm_flower_model.joblib")
-sepal_length = st.slider("Sepal length (cm)", 4.0, 8.0, 5.8, 0.1)
-sepal_width = st.slider("Sepal width (cm)", 2.0, 4.5, 3.0, 0.1)
-petal_length = st.slider("Petal length (cm)", 1.0, 7.0, 4.0, 0.1)
-petal_width = st.slider("Petal width (cm)", 0.1, 2.8, 1.3, 0.1)
+
+
+def sync_input(source_key, target_key):
+    st.session_state[target_key] = st.session_state[source_key]
+
+
+def feature_input(label, minimum, maximum, default):
+    slider_key = f"{label}_slider"
+    number_key = f"{label}_number"
+    st.session_state.setdefault(slider_key, default)
+    st.session_state.setdefault(number_key, default)
+    st.slider(
+        label,
+        minimum,
+        maximum,
+        step=0.01,
+        key=slider_key,
+        on_change=sync_input,
+        args=(slider_key, number_key),
+    )
+    st.number_input(
+        f"{label} (กรอกตัวเลข)",
+        minimum,
+        maximum,
+        step=0.01,
+        format="%.2f",
+        key=number_key,
+        on_change=sync_input,
+        args=(number_key, slider_key),
+    )
+    return st.session_state[number_key]
+
+
+sepal_length = feature_input("Sepal length (cm)", 4.0, 8.0, 5.8)
+sepal_width = feature_input("Sepal width (cm)", 2.0, 4.5, 3.0)
+petal_length = feature_input("Petal length (cm)", 1.0, 7.0, 4.0)
+petal_width = feature_input("Petal width (cm)", 0.1, 2.8, 1.3)
 
 input_df = pd.DataFrame([{
 "sepal_length_cm": sepal_length,
